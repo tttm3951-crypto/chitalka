@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.pyc
+cache/
+voices/
+tools/
+backup/
+тест/
+Образцы голосов/
+settings*.json
+settings.json.bak
+installed.json
+error.log
+install.log
+Словарь произношения.txt
+*.part
+build/
+dist/
+*.spec
+.build-venv/

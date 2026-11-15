@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d3557">
+<title>Читалка — аудио рассказ</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--fg:#1f1f1f;--muted:#6b6b6b;--acc:#1d3557;--acc2:#e76f51;--ok:#2a9d8f;--line:#e4ded2}
+@media (prefers-color-scheme:dark){:root{--bg:#16181c;--card:#202329;--fg:#e8e8e8;--muted:#9aa0a6;--acc:#8ab4f8;--acc2:#f4a261;--ok:#4cc9b0;--line:#30343b}}
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);padding:env(safe-area-inset-top) 0 40px}
+header{background:var(--acc);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+@media (prefers-color-scheme:dark){header{background:#1d2a44}}
+header h1{font-size:20px;margin:0;flex:1}
+header button{background:transparent;border:1px solid #ffffff66;color:#fff;border-radius:8px;padding:4px 10px;font-size:14px}
+main{max-width:640px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+h2{font-size:17px;margin:0 0 10px;color:var(--acc)}
+label{display:block;font-size:14px;color:var(--muted);margin:10px 0 4px}
+select,input[type=password],input[type=tel]{width:100%;font-size:17px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font-size:18px;font-weight:600;background:var(--acc2);color:#fff;margin-top:14px}
+.btn.sec{background:transparent;color:var(--acc);border:1px solid var(--line);font-weight:500;font-size:16px;padding:11px}
+.btn:disabled{opacity:.5}
+.pick{border:2px dashed var(--line);border-radius:14px;padding:22px 10px;text-align:center;color:var(--muted)}
+.pick b{color:var(--fg);display:block;font-size:18px;margin-bottom:4px}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 2px}
+.bar>i{display:block;height:100%;background:var(--ok);width:0;transition:width .4s}
+.item{border-top:1px solid var(--line);padding:10px 0}
+.item:first-of-type{border-top:0}
+.t{font-weight:600}
+.m{font-size:13px;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row a,.row button{font-size:14px;color:var(--acc);background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;text-decoration:none}
+audio{width:100%;margin-top:6px}
+.err{color:#c0392b;font-size:15px;margin-top:8px;white-space:pre-line}
+.hint{font-size:13px;color:var(--muted);margin-top:8px}
+.hide{display:none}
+.chip{display:inline-block;font-size:12px;border-radius:10px;padding:1px 8px;background:var(--line);color:var(--fg)}
+</style>
+</head>
+<body>
+<header><h1>📖 Читалка</h1><button id="out" class="hide" onclick="logout()">Выйти</button></header>
+<main>
+
+<section id="login" class="card hide">
+  <h2>Вход</h2>
+  <p class="m">Введите PIN — он показан в Читалке на компьютере: <b>Файл → 📱 Доступ с телефона</b>.</p>
+  <input id="pin" type="tel" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="PIN">
+  <button class="btn" onclick="login()">Войти</button>
+  <div id="lerr" class="err"></div>
+</section>
+
+<div id="app" class="hide">
+<section class="card">
+  <h2>1. Книга</h2>
+  <label class="pick" for="file"><b>📄 Выбрать файл</b>PDF, EPUB, FB2, DOCX, TXT, RTF, MOBI, DJVU</label>
+  <input id="file" type="file" class="hide" accept=".pdf,.epub,.fb2,.zip,.docx,.doc,.txt,.rtf,.mobi,.azw3,.djvu,.djv,.odt,.htm,.html">
+  <div id="up" class="hide"><div class="m" id="upname"></div><div class="bar"><i id="upbar"></i></div><div class="m" id="uptxt"></div></div>
+  <label for="book">или из загруженных раньше</label>
+  <select id="book"></select>
+</section>
+
+<section class="card">
+  <h2>2. Как читать</h2>
+  <label for="voice">Голос</label>
+  <select id="voice"></select>
+  <label for="rate">Скорость</label>
+  <select id="rate">
+    <option value="0.85">медленнее</option><option value="1" selected>обычная</option>
+    <option value="1.1">чуть быстрее</option><option value="1.25">быстрее</option><option value="1.5">быстро</option>
+  </select>
+  <label for="q">Качество</label>
+  <select id="q"></select>
+  <button class="btn" id="go" onclick="go()">🎧 Создать аудио рассказ</button>
+  <div id="gerr" class="err"></div>
+  <div class="hint">Компьютер должен быть включён. Можно закрыть страницу — работа продолжится, а готовый файл появится ниже.</div>
+</section>
+
+<section class="card" id="jobsc">
+  <h2>Сейчас озвучивается</h2>
+  <div id="jobs"><div class="m">Ничего не озвучивается.</div></div>
+</section>
+
+<section class="card">
+  <h2>Готовые аудио рассказы</h2>
+  <div id="ready"><div class="m">Пока пусто.</div></div>
+</section>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let S=null, timer=null, chosen=localStorage.getItem('voice')||'';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(path,opt={}){
+  const r=await fetch(path,Object.assign({credentials:'same-origin'},opt));
+  let j={}; try{j=await r.json()}catch(e){}
+  if(r.status===401){show('login');throw new Error('pin')}
+  if(!r.ok) throw new Error(j.error||('Ошибка '+r.status));
+  return j;
+}
+function show(w){ $('login').classList.toggle('hide',w!=='login'); $('app').classList.toggle('hide',w!=='app'); $('out').classList.toggle('hide',w!=='app');
+  if(w==='login'){clearInterval(timer);timer=null;setTimeout(()=>$('pin').focus(),100)} }
+
+async function login(){
+  $('lerr').textContent='';
+  try{ await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value.trim()})});
+       $('pin').value=''; start(); }
+  catch(e){ if(e.message!=='pin') $('lerr').textContent=e.message; }
+}
+$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+async function logout(){ try{await api('/api/logout',{method:'POST'})}catch(e){} show('login'); }
+
+function fillSelect(sel,items,cur){
+  const old=sel.value;
+  let html='',g=null;
+  for(const o of items){
+    if(o.group!==undefined&&o.group!==g){ if(g!==null) html+='</optgroup>'; html+=`<optgroup label="${esc(o.group)}">`; g=o.group; }
+    html+=`<option value="${esc(o.id)}">${esc(o.title)}</option>`;
+  }
+  if(g!==null) html+='</optgroup>';
+  sel.innerHTML=html;
+  const want=cur||old;
+  if(want && [...sel.options].some(x=>x.value===want)) sel.value=want;
+}
+
+function render(){
+  if(!S) return;
+  if(!$('voice').options.length) fillSelect($('voice'),S.voices,chosen||S.default_voice);
+  if(!$('q').options.length){ fillSelect($('q'),S.qualities,String(S.default_quality)); }
+  const keep=$('book').value;
+  fillSelect($('book'),[{id:'',title:S.uploads.length?'— выберите —':'(пока ничего не загружено)'}].concat(S.uploads.map(u=>({id:u.name,title:u.name+'  ·  '+u.mb+' МБ'}))),keep);
+  // задания
+  const J=S.jobs;
+  $('jobs').innerHTML=J.length?J.map(j=>`<div class="item"><div class="t">${esc(j.title)}</div>
+    <div class="m">${esc(j.voice)} · ${esc(j.state)}${j.eta?' · осталось ≈ '+esc(j.eta):''}</div>
+    <div class="bar"><i style="width:${j.pct}%"></i></div><div class="row"><span class="m">${j.pct}%</span>
+    ${j.mine?`<button onclick="cancelJob('${esc(j.id)}')">Отменить</button>`:''}</div></div>`).join('')
+    :'<div class="m">Ничего не озвучивается.</div>';
+  const R=S.ready;
+  const openNow=new Set([...document.querySelectorAll('audio')].filter(a=>!a.paused).map(a=>a.dataset.k));
+  if(openNow.size) return;  // не перерисовываем, пока что-то играет
+  $('ready').innerHTML=R.length?R.map(r=>`<div class="item"><div class="t">${esc(r.title)}</div>
+    <div class="m">${esc(r.date)} · ${esc(r.voice)} ${r.phone?'<span class="chip">📱</span>':''}</div>
+    ${r.files.map(f=>`<div class="row" style="margin-top:6px"><span class="m" style="flex:1">${esc(f.name)} · ${f.mb} МБ</span>
+      <a href="/api/file?id=${encodeURIComponent(r.id)}&n=${f.n}&dl=1">⬇ Скачать</a>
+      ${f.audio?`<button onclick="play(this,'${encodeURIComponent(r.id)}',${f.n})">▶ Слушать</button>`:''}</div>`).join('')}
+    </div>`).join(''):'<div class="m">Пока пусто.</div>';
+}
+function play(btn,id,n){
+  const a=document.createElement('audio'); a.controls=true; a.preload='none'; a.dataset.k=id+'_'+n;
+  a.src='/api/file?id='+id+'&n='+n; btn.replaceWith(a); a.play();
+}
+async function refresh(){ try{ S=await api('/api/state'); show('app'); render(); }catch(e){ if(e.message!=='pin') console.log(e) } }
+function start(){ refresh(); clearInterval(timer); timer=setInterval(()=>{ if(!document.hidden) refresh() },3000); }
+
+$('file').addEventListener('change',()=>{
+  const f=$('file').files[0]; if(!f) return;
+  $('up').classList.remove('hide'); $('upname').textContent=f.name; $('uptxt').textContent='загружаю…'; $('upbar').style.width='0';
+  $('go').disabled=true;
+  const x=new XMLHttpRequest();
+  x.open('POST','/api/upload?name='+encodeURIComponent(f.name));
+  x.setRequestHeader('Content-Type','application/octet-stream');
+  x.upload.onprogress=e=>{ if(e.lengthComputable){ const p=Math.round(e.loaded*100/e.total); $('upbar').style.width=p+'%';
+     $('uptxt').textContent=p+'% · '+(e.loaded/1048576).toFixed(1)+' из '+(e.total/1048576).toFixed(1)+' МБ'; } };
+  x.onload=async()=>{ $('go').disabled=false; let j={}; try{j=JSON.parse(x.responseText)}catch(e){}
+     if(x.status===200){ $('uptxt').textContent='✔ загружено'; await refresh(); $('book').value=j.file; }
+     else if(x.status===401){ show('login'); }
+     else $('uptxt').textContent='✖ '+(j.error||('ошибка '+x.status)); };
+  x.onerror=()=>{ $('go').disabled=false; $('uptxt').textContent='✖ связь прервалась — попробуйте ещё раз'; };
+  x.send(f);
+});
+
+async function go(){
+  $('gerr').textContent='';
+  const book=$('book').value;
+  if(!book){ $('gerr').textContent='Сначала выберите книгу'; return; }
+  localStorage.setItem('voice',$('voice').value);
+  $('go').disabled=true;
+  try{ const j=await api('/api/job',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({file:book,voice:$('voice').value,rate:parseFloat($('rate').value),quality:parseInt($('q').value)})});
+       $('gerr').style.color='var(--ok)'; $('gerr').textContent='✔ '+(j.msg||'Принято'); setTimeout(()=>{$('gerr').textContent='';$('gerr').style.color=''},6000);
+       refresh(); }
+  catch(e){ if(e.message!=='pin') $('gerr').textContent=e.message; }
+  $('go').disabled=false;
+}
+async function cancelJob(id){ if(!confirm('Отменить озвучку этой книги?')) return;
+  try{ await api('/api/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); refresh(); }catch(e){} }
+start();
+</script>
+</body>
+</html>
