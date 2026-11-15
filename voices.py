@@ -37,7 +37,7 @@ def job_valid() -> bool:
     return f() if f else True
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 VOICES_DIR = os.path.join(APP_DIR, "voices")
-EDGE_CACHE = os.path.join(VOICES_DIR, "edge_voices.json")
+EDGE_CATALOG = os.path.join(VOICES_DIR, "edge_voices.json")
 
 DEFAULT_VOICE = "edge:ru-RU-SvetlanaNeural"
 DEFAULT_FALLBACK = "silero:auto/eugene"
@@ -102,7 +102,7 @@ def _gender_ru(g: str) -> str:
 
 def _edge_entries():
     try:
-        with open(EDGE_CACHE, encoding="utf-8") as f:
+        with open(EDGE_CATALOG, encoding="utf-8") as f:
             data = json.load(f)
         if isinstance(data, list) and len(data) > 20:
             return [(v["ShortName"], v.get("Gender", ""), v.get("VoiceTag", {}).get("VoicePersonalities", []))
@@ -123,7 +123,7 @@ def refresh_edge_catalog(timeout=15) -> bool:
         data = asyncio.run(run())
         if data:
             os.makedirs(VOICES_DIR, exist_ok=True)
-            with open(EDGE_CACHE, "w", encoding="utf-8") as f:
+            with open(EDGE_CATALOG, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False)
             return True
     except Exception:  # noqa: BLE001

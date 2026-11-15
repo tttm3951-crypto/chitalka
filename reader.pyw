@@ -942,7 +942,7 @@ class App:
     def _refresh_catalog_bg(self):
         """Раз в месяц обновляет полный список голосов Edge (если есть интернет)."""
         try:
-            age = time.time() - os.path.getmtime(speech.EDGE_CACHE)
+            age = time.time() - os.path.getmtime(speech.EDGE_CATALOG)
         except OSError:
             age = 1e9
         if age < 30 * 86400:

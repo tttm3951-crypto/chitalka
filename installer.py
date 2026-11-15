@@ -386,8 +386,8 @@ class Installer:
             say("  готово")
 
             env = clean_env(PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
-            p = subprocess.Popen([vpy, "-u", os.path.join(d, "install_helper.py"), "--components", ",".join(comps),
-                                  "--shortcut"], cwd=d, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env, **NOWIN)
+            p = subprocess.Popen([vpy, "-u", os.path.join(d, "install_helper.py"), "--components", ",".join(comps)]
+                                 + ([] if os.environ.get("CHITALKA_NO_SHORTCUT") else ["--shortcut"]), cwd=d, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env, **NOWIN)
             fails = []
             for raw in p.stdout:
                 line = raw.decode("utf-8", "replace").rstrip()

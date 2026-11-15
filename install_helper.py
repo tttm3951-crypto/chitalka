@@ -172,7 +172,7 @@ def c_core():
         sys.path.insert(0, APP)
         import voices
         if voices.refresh_edge_catalog(timeout=30):
-            with open(voices.EDGE_CACHE, encoding="utf-8") as f:
+            with open(voices.EDGE_CATALOG, encoding="utf-8") as f:
                 say(f"  голосов: {len(json.load(f))}")
         else:
             say("  не удалось (нет интернета?) — будет встроенный список")
