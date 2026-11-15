@@ -28,7 +28,7 @@ PY_URL = "https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe"
 TITLE = "Установка Читалки"
 NOWIN = {"creationflags": 0x08000000} if sys.platform == "win32" else {}
 KEEP = {"settings.json", "settings.json.bak", "settings.backup.json", "installed.json", "error.log",
-        "Словарь произношения.txt", ".venv", "voices", "cache", "tools", "backup", "Образцы голосов", "тест"}
+        "Словарь произношения.txt", ".venv", "voices", "cache", "tools", "backup", "Образцы голосов", "тест", "setup"}
 BG, CARD, ACC, FG, MUTED = "#F6F4EF", "#FFFFFF", "#B5713E", "#2E2E2E", "#77706A"
 
 
