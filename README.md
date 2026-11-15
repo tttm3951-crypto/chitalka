@@ -5,7 +5,7 @@
 
 ## Установка одним кликом
 
-1. Скачайте **[Chitalka-Setup.exe](https://github.com/tttm3951-crypto/chitalka/raw/main/setup/Chitalka-Setup.exe)**.
+1. Скачайте **[Chitalka-Setup.exe](https://github.com/tttm3951-crypto/chitalka/releases/latest/download/Chitalka-Setup.exe)**.
 2. Запустите, отметьте нужные улучшения и нажмите «Установить».
    Установщик сам скачает Python (если его нет), программу, голоса и создаст ярлык «Читалка».
    Права администратора не нужны.

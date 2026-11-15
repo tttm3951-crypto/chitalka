@@ -18,7 +18,7 @@ BRANCH = "main"
 RAW = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/"
 ZIP_URL = f"https://codeload.github.com/{REPO}/zip/refs/heads/{BRANCH}"
 PAGE_URL = f"https://github.com/{REPO}"
-SETUP_URL = f"https://github.com/{REPO}/raw/main/setup/Chitalka-Setup.exe"
+SETUP_URL = f"https://github.com/{REPO}/releases/latest/download/Chitalka-Setup.exe"
 NOWIN = {"creationflags": 0x08000000} if sys.platform == "win32" else {}
 # Это никогда не трогаем при обновлении: настройки, голоса, кэш, словарь, окружение Python
 KEEP = {"settings.json", "settings.json.bak", "settings.backup.json", "installed.json", "error.log",
