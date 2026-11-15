@@ -5140,6 +5140,11 @@ class WebBridge:
         if kbps not in {k for k, _ in self.QUALITIES}:
             raise ValueError("Неверное качество")
         self._w()["quality"] = kbps
+        busy = next((j for j in list(self.app._jobs()) if j.get("status") in ("wait", "run")
+                     and os.path.normcase(j.get("path", "")) == os.path.normcase(path)), None)
+        if busy:
+            return ("Эта книга уже озвучивается — ход работы ниже. Чтобы сменить голос или скорость, "
+                    "отмените её и поставьте заново.")
         self.app.q.put(("web_job", {"path": path, "voice": vid, "rate": rate, "quality": kbps}))
         return "Книга поставлена в очередь озвучки. Ход работы — ниже."
 
